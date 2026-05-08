@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { worldCups, getWorldCupByYear } from '@/data/world-cups';
+import { participantsByYear, finalLineupsByYear } from '@/data/world-cups-extra';
 
 const WorldCupDetail: React.FC = () => {
   const { year } = useParams<{ year: string }>();
@@ -35,6 +36,10 @@ const WorldCupDetail: React.FC = () => {
 
   const getTeamFlag = (iso?: string) =>
     iso ? `https://flagcdn.com/w80/${iso}.png` : null;
+
+  // Dados extras
+  const participants = participantsByYear[cup.year] || [];
+  const finalLineup = finalLineupsByYear[cup.year];
 
   return (
     <div className="min-h-screen">
@@ -187,6 +192,134 @@ const WorldCupDetail: React.FC = () => {
                   <p className="text-muted-foreground leading-relaxed">
                     {cup.notableMatch}
                   </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Seleções participantes */}
+            {participants.length > 0 && (
+              <Card className="rounded-2xl border-border">
+                <CardContent className="p-6">
+                  <h2 className="font-display text-2xl mb-4 flex items-center gap-2">
+                    <Users className="w-6 h-6 text-primary" />
+                    Seleções participantes
+                    <span className="text-base text-muted-foreground font-normal ml-1">
+                      ({participants.length})
+                    </span>
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                    {participants.map((p) => {
+                      const isChampion = p.name === cup.podium.champion;
+                      const isRunnerUp = p.name === cup.podium.runnerUp;
+                      const isThird = p.name === cup.podium.thirdPlace;
+                      return (
+                        <div
+                          key={p.name}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm ${
+                            isChampion
+                              ? 'border-gold/40 bg-gold/10'
+                              : isRunnerUp
+                              ? 'border-slate-400/40 bg-slate-400/10'
+                              : isThird
+                              ? 'border-amber-700/40 bg-amber-700/5'
+                              : 'border-border bg-secondary/30'
+                          }`}
+                        >
+                          <img
+                            src={`https://flagcdn.com/w40/${p.iso}.png`}
+                            alt={p.name}
+                            className="w-6 h-4 object-cover rounded flex-shrink-0"
+                            loading="lazy"
+                          />
+                          <span className="truncate flex-1">{p.name}</span>
+                          {isChampion && <Crown className="w-3 h-3 text-gold flex-shrink-0" />}
+                          {isRunnerUp && <Medal className="w-3 h-3 text-slate-400 flex-shrink-0" />}
+                          {isThird && <Award className="w-3 h-3 text-amber-700 flex-shrink-0" />}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Escalações da final */}
+            {finalLineup && (
+              <Card className="rounded-2xl border-border">
+                <CardContent className="p-6">
+                  <h2 className="font-display text-2xl mb-4 flex items-center gap-2">
+                    <Goal className="w-6 h-6 text-primary" />
+                    Escalações da final
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[finalLineup.home, finalLineup.away].map((side, sideIdx) => {
+                      const isWinner = sideIdx === 0; // home é sempre o vencedor nos meus dados
+                      return (
+                        <div
+                          key={side.team}
+                          className={`rounded-xl border p-4 ${
+                            isWinner
+                              ? 'border-gold/40 bg-gold/5'
+                              : 'border-border bg-secondary/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border">
+                            <img
+                              src={`https://flagcdn.com/w80/${side.iso}.png`}
+                              alt={side.team}
+                              className="w-10 h-7 object-cover rounded"
+                            />
+                            <div className="flex-1">
+                              <div className="font-display text-lg flex items-center gap-2">
+                                {side.team}
+                                {isWinner && <Crown className="w-4 h-4 text-gold" />}
+                              </div>
+                              {side.coach && (
+                                <div className="text-xs text-muted-foreground">
+                                  Téc. {side.coach}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <ol className="space-y-1.5 text-sm">
+                            {side.players.map((p, i) => (
+                              <li
+                                key={p.name}
+                                className="flex items-center gap-2 py-1"
+                              >
+                                <span className="font-mono text-xs text-muted-foreground w-5 text-right flex-shrink-0">
+                                  {i + 1}.
+                                </span>
+                                <span className="flex-1">
+                                  {p.name}
+                                  {p.ownGoal && (
+                                    <span className="text-xs text-muted-foreground ml-1">
+                                      (gol contra)
+                                    </span>
+                                  )}
+                                </span>
+                                {p.goals && p.goals > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    {Array.from({ length: p.goals }).map((_, gIdx) => (
+                                      <span
+                                        key={gIdx}
+                                        className="w-2.5 h-2.5 rounded-full bg-green-500"
+                                        title={`Gol${p.goals! > 1 ? ` ${gIdx + 1}` : ''}${p.ownGoal ? ' contra' : ''}`}
+                                      />
+                                    ))}
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                    <span>Bolinha verde indica gol marcado pelo jogador na final</span>
+                  </div>
                 </CardContent>
               </Card>
             )}

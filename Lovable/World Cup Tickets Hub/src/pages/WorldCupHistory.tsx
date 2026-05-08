@@ -16,17 +16,24 @@ const WorldCupHistory: React.FC = () => {
     return worldCups.filter((c) => c.year >= decade && c.year < decade + 10);
   }, [decadeFilter]);
 
-  // Estatísticas globais
+  // Estatísticas globais — consolida nações que mudaram de nome.
+  // "Alemanha Ocidental" (1949-1990) era a Alemanha que jogava as Copas;
+  // após reunificação volta a ser apenas "Alemanha". Conta como mesmo país.
+  const NORMALIZE: Record<string, string> = {
+    'Alemanha Ocidental': 'Alemanha',
+  };
   const realizadas = worldCups.filter((c) => !c.upcoming).length;
   const champions = worldCups
     .filter((c) => !c.upcoming)
     .reduce((acc, c) => {
-      acc[c.podium.champion] = (acc[c.podium.champion] || 0) + 1;
+      const name = NORMALIZE[c.podium.champion] || c.podium.champion;
+      acc[name] = (acc[name] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
+  // Mostra todos os países com 2 ou mais títulos
   const topChampions = Object.entries(champions)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
+    .filter(([, titles]) => titles >= 2);
 
   return (
     <div className="min-h-screen py-12">
@@ -71,18 +78,20 @@ const WorldCupHistory: React.FC = () => {
           </div>
         </div>
 
-        {/* Top campeões */}
+        {/* Top campeões — todos com 2+ títulos */}
         <div className="mb-8 p-5 rounded-xl bg-gradient-to-r from-gold/10 to-primary/10 border border-gold/20 max-w-3xl mx-auto">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-            Maiores campeões mundiais
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
+            Maiores campeões mundiais (2 ou mais títulos)
           </div>
-          <div className="flex flex-wrap gap-3">
-            {topChampions.map(([nation, titles], i) => (
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {topChampions.map(([nation, titles]) => (
               <div key={nation} className="flex items-center gap-2">
-                <span className="text-2xl">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
                 <span className="font-display text-lg">{nation}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({titles} título{titles > 1 ? 's' : ''})
+                <span className="text-sm font-bold text-primary">
+                  {titles}× campeã
+                </span>
+                <span className="text-base">
+                  {'⭐'.repeat(titles)}
                 </span>
               </div>
             ))}
