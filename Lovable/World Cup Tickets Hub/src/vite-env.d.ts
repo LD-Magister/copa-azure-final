@@ -16,6 +16,13 @@ interface ImportMetaEnv {
   readonly VITE_GATEWAY_V2_URL?: string;
   /** Redirect URI registrada na App Registration (dev: http://localhost:5173). */
   readonly VITE_ENTRA_REDIRECT_URI?: string;
+  /**
+   * Story 2.6 / F6 — base das rotas do serviço FlowEvents EXPOSTAS PELO GATEWAY YARP
+   * (ex.: https://gateway-xy.azurecontainerapps.io/flow-events). O gateway é o nó zero:
+   * injeta X-Correlation-ID também nas chamadas ao FlowEvents. Inclui /api/flow/** (REST)
+   * e /hubs/flow (SignalR). NUNCA hardcoded.
+   */
+  readonly VITE_FLOW_EVENTS_BASE_URL?: string;
 }
 
 interface ImportMeta {

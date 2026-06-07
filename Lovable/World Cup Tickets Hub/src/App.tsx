@@ -33,6 +33,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const TicketVerify = lazy(() => import("./pages/TicketVerify"));
 const WorldCupHistory = lazy(() => import("./pages/WorldCupHistory"));
 const WorldCupDetail = lazy(() => import("./pages/WorldCupDetail"));
+// Story 2.6 / F6 — Flow Visualizer (rota /flow). Lazy: bundle separado (framer-motion + signalr).
+const Flow = lazy(() => import("./pages/Flow"));
 
 // Admin pages: bundle separado, só carrega para admins.
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -104,6 +106,8 @@ const App = () => (
                 <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
                 <Route path="/payment-confirmation" element={<Layout><PaymentConfirmation /></Layout>} />
                 <Route path="/ticket/verify/:id" element={<Layout><TicketVerify /></Layout>} />
+                {/* Story 2.6 / F6 — Flow Visualizer em tempo real (Gateway YARP → SQL). */}
+                <Route path="/flow" element={<Layout><Flow /></Layout>} />
                 <Route path="/profile" element={<Layout><Profile /></Layout>} />
                 <Route path="*" element={<Layout><NotFound /></Layout>} />
               </Routes>

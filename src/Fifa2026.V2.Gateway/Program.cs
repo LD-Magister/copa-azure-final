@@ -46,6 +46,10 @@ builder.Services
     .AddConfigFilter<FunctionDestinationConfigFilter>()
     // Story 2.5 / F5 — injeta a URL real do McpServer no cluster mcp-server (AC-8).
     .AddConfigFilter<McpServerDestinationConfigFilter>()
+    // Story 2.6 / F6 — injeta a URL real do serviço FlowEvents no cluster flow-events
+    // (AC-3/AC-5). O gateway permanece o NÓ ZERO: injeta X-Correlation-ID nas requests
+    // ao FlowEvents também (mesmo transform global de borda).
+    .AddConfigFilter<FlowEventsDestinationConfigFilter>()
     .AddTransforms(transformBuilderContext =>
     {
         // AC-8 / ADE-000 Inv 5 — injeta X-Correlation-ID (novo GUID se ausente) em
